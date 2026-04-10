@@ -1,0 +1,20 @@
+{
+  "tagline": "Basic Setup",
+  "faviconVersion": null,
+  "fontFamily": "\u0022Co\u0022, sans-serif",
+  "primaryColor": "#1a1a2e",
+  "secondaryColor": "#f42a34",
+  "accentColor": "#98db85",
+  "customCss": "/* __site_font_upload_start__ */\n@font-face {\n  font-family: \u0022Co\u0022;\n  src: url(\u0022../../fonts/Co/Co-Headline-Light.otf\u0022) format(\u0022opentype\u0022);\n  font-style: normal;\n  font-weight: 300;\n  font-display: swap;\n}\n\n@font-face {\n  font-family: \u0022Co\u0022;\n  src: url(\u0022../../fonts/Co/Co-Headline.otf\u0022) format(\u0022opentype\u0022);\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n}\n\n@font-face {\n  font-family: \u0022Co\u0022;\n  src: url(\u0022../../fonts/Co/Co-Headline-Bold.otf\u0022) format(\u0022opentype\u0022);\n  font-style: normal;\n  font-weight: 700;\n  font-display: swap;\n}\n\n/* __site_font_upload_end__ */",
+  "userCss": "body {background-color: red;}",
+  "userJs": "$(function () { console.log(\u0027ready\u0027); });",
+  "contentWrapperClass": "box-padding",
+  "boxPadding": {
+    "minPaddingInlinePx": 15,
+    "maxPaddingInlinePx": 180,
+    "minFluidViewportPx": 870,
+    "maxFluidViewportPx": 1700
+  },
+  "containerScss": ".container {\n  position: relative;\n  width: 100%;\n  padding: 0 15px;\n  margin: 0 auto;\n  z-index: 1;\n\n  @media (min-width: 48px) {\n    //768px\n    max-width: 100rem;\n  }\n\n  @media (min-width: 62rem) {\n    //992px\n    max-width: 110rem;\n  }\n\n  @media (min-width: 75rem) {\n    //1200px\n    max-width: 130rem;\n  }\n\n  @media (min-width: 87.5rem) {\n    //1400px\n    max-width: 129rem;\n  }\n  @media (min-width: 93.75rem) {\n    //1500px\n    max-width: 140rem;\n  }\n  @media (min-width: 100rem) {\n    //1600px\n    max-width: 150rem;\n  }\n  @media (min-width: 106.25rem) {\n    //1700px\n    max-width: 166.8rem;\n  }\n}",
+  "useRem10px": true
+}

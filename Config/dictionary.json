@@ -1,0 +1,18 @@
+{
+  "items": [
+    { "key": "Language", "translations": { "en-US": "Language", "zh-Hans": "Language", "zh-Hant": "Language" } },
+    { "key": "Language.en", "translations": { "en-US": "EN", "zh-Hans": "EN", "zh-Hant": "EN" } },
+    { "key": "Language.en-US", "translations": { "en-US": "EN", "zh-Hans": "EN", "zh-Hant": "EN" } },
+    { "key": "Language.cn", "translations": { "en-US": "CN", "zh-Hans": "简体中文", "zh-Hant": "簡體中文" } },
+    { "key": "Language.zh-Hans-cn", "translations": { "en-US": "简", "zh-Hans": "简", "zh-Hant": "简" } },
+    { "key": "Language.zh-Hant-hk", "translations": { "en-US": "繁", "zh-Hans": "繁", "zh-Hant": "繁" } },
+    { "key": "Language.hk", "translations": { "en-US": "HK", "zh-Hans": "繁體中文", "zh-Hant": "繁體中文" } },
+    { "key": "View More", "translations": { "en-US": "View More", "zh-Hans": "查看更多", "zh-Hant": "查看更多" } },
+    { "key": "View Details", "translations": { "en-US": "View Details", "zh-Hans": "查看更多", "zh-Hant": "查看更多" } },
+    { "key": "All", "translations": { "en-US": "All", "zh-Hans": "全部", "zh-Hant": "全部" } },
+    { "key": "Phone", "translations": { "en-US": "Phone", "zh-Hans": "电话", "zh-Hant": "電話" } },
+    { "key": "Position", "translations": { "en-US": "Position", "zh-Hans": "职位", "zh-Hant": "職位" } },
+    { "key": "Select Year", "translations": { "en-US": "Select Year", "zh-Hans": "选择年份", "zh-Hant": "選擇年份" } },
+    { "key": "Name", "translations": { "en-US": "Name", "zh-Hans": "姓名", "zh-Hant": "姓名" } }
+  ]
+}

@@ -1,0 +1,426 @@
+<div class="tg-setting-general-host">
+<div ng-controller="Test13.SettingGeneral.Overview" class="tg-setting-general">
+  <div class="tg-setting-general__intro">
+    <h1 class="umb-panel-header-name">Setup everything common for your site</h1>
+    <p class="tg-muted">
+      Fonts, color palette and optional custom CSS — saved to <code>Config/general-settings.json</code>
+    </p>
+  </div>
+
+  <div ng-show="loading" class="tg-loading">Loading…</div>
+
+  <div ng-show="!loading">
+    <div class="tg-setting-general__card">
+      <div class="tg-setting-general__card-header">
+        <span class="tg-setting-general__card-title">Site Identity</span>
+        <button
+          type="button"
+          class="tg-setting-general__card-toggle"
+          ng-click="toggleCard('siteIdentity')"
+          aria-label="{{ isCardOpen('siteIdentity') ? 'Collapse' : 'Expand' }}"
+     
+          aria-expanded="{{ isCardOpen('siteIdentity') }}"
+        >
+          <span
+            class="icon icon-navigation-down tg-setting-general__card-toggle-icon"
+            ng-class="{ 'is-open': isCardOpen('siteIdentity') }"
+            aria-hidden="true"
+          ></span>
+        </button>
+      </div>
+      <div class="tg-setting-general__card-body" ng-show="isCardOpen('siteIdentity')">
+        <div class="tg-field">
+          <label class="tg-field__label" for="tg-site-tagline">Tagline</label>
+          <span class="tg-field__hint">
+            Displayed in the browser tab.
+          </span>
+          <input
+            id="tg-site-tagline"
+            type="text"
+            class="umb-property-editor umb-textstring"
+            ng-model="settings.tagline"
+            placeholder="e.g. Trusted partner for investors"
+          />
+        </div>
+
+        <div class="tg-field">
+          <span class="tg-field__label">Favicon (.ico)</span>
+          <span class="tg-field__hint">
+            Upload file <code>favicon.ico</code> (saved to <code>/wwwroot/favicon.ico</code>).
+          </span>
+          <div class="tg-font-upload-row">
+            <button
+              type="button"
+              class="btn btn-default"
+              ng-disabled="uploadingFavicon"
+              ng-click="triggerFaviconPicker()"
+            >
+              Select favicon.ico…
+            </button>
+            <input
+              id="tg-favicon-upload"
+              type="file"
+              accept=".ico,image/x-icon"
+              class="tg-font-file-input"
+              tabindex="-1"
+              ng-disabled="uploadingFavicon"
+              onchange="angular.element(this).scope().onFaviconChosen(this);"
+            />
+          </div>
+          <span ng-show="uploadingFavicon" class="tg-muted" style="display: block; margin-top: 0.35rem"
+            >Uploading…</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="tg-setting-general__card">
+      <div class="tg-setting-general__card-header">
+        <span class="tg-setting-general__card-title">Site appearance</span>
+        <button
+          type="button"
+          class="tg-setting-general__card-toggle"
+          ng-click="toggleCard('siteAppearance')"
+          aria-label="{{ isCardOpen('siteAppearance') ? 'Collapse' : 'Expand' }}"
+          aria-expanded="{{ isCardOpen('siteAppearance') }}"
+        >
+          <span
+            class="icon icon-navigation-down tg-setting-general__card-toggle-icon"
+            ng-class="{ 'is-open': isCardOpen('siteAppearance') }"
+            aria-hidden="true"
+          ></span>
+        </button>
+      </div>
+      <div class="tg-setting-general__card-body" ng-show="isCardOpen('siteAppearance')">
+        <div class="tg-field">
+          <label class="tg-field__label" for="tg-font-select">Font</label>
+          <span class="tg-field__hint"
+            >Pick a preset, or choose Custom to enter a CSS font-family value.</span
+          >
+          <select
+            id="tg-font-select"
+            class="umb-property-editor umb-dropdown"
+            ng-model="fontSelection"
+            ng-options="o.value as o.label for o in fontChoices"
+          ></select>
+          <div ng-show="isCustomFontSelection()" class="tg-font-upload-block" style="margin-top: 0.75rem">
+            <span class="tg-field__label">Upload font (optional)</span>
+            <span class="tg-field__hint">
+              You can select multiple files at once. Supported formats: .woff2, .woff, .ttf, .otf — maximum 5 MB per file, total up to approximately 50 MB. Save into
+              <code>/fonts/</code> with a subfolder named after the font family.
+            </span>
+            <label class="tg-field__hint" for="tg-font-family-upload-name" style="margin-top: 0.5rem"
+              >Font family name (common)</label
+            >
+            <input
+              id="tg-font-family-upload-name"
+              type="text"
+              class="umb-property-editor umb-textstring"
+              ng-model="fontFamilyUploadName"
+              placeholder="Custom Font"
+            />
+            <div class="tg-font-upload-row">
+              <button
+                type="button"
+                class="btn btn-default"
+                ng-disabled="uploadingFont"
+                ng-click="triggerCustomFontFilePicker()"
+              >
+                Select font file…
+              </button>
+              <input
+                id="tg-font-upload"
+                type="file"
+                multiple
+                accept=".woff2,.woff,.ttf,.otf"
+                class="tg-font-file-input"
+                tabindex="-1"
+                ng-disabled="uploadingFont"
+                onchange="angular.element(this).scope().onCustomFontFileChosen(this);"
+              />
+            </div>
+            <span ng-show="uploadingFont" class="tg-muted" style="display: block; margin-top: 0.35rem"
+              >Uploading…</span
+            >
+          </div>
+          <div ng-show="isCustomFontSelection()" style="margin-top: 0.75rem">
+            <label class="tg-field__hint" for="tg-font-custom">font-family (CSS)</label>
+            <input
+              id="tg-font-custom"
+              type="text"
+              class="umb-property-editor umb-textstring"
+              ng-model="customFont"
+              placeholder='e.g. "[Your Font Name]", sans-serif'
+            />
+          </div>
+        </div>
+
+        <div class="tg-field">
+          <span class="tg-field__label">Color palette</span>
+          <span class="tg-field__hint"
+            >Primary, secondary and accent. Wire these to your site layout (e.g. CSS variables) as needed.</span
+          >
+          <div class="tg-palette">
+            <div class="tg-palette__swatch">
+              <span class="tg-sublabel">Primary</span>
+              <input type="color" ng-model="settings.primaryColor" title="Primary" />
+              <input
+                type="text"
+                class="umb-property-editor umb-textstring tg-input--mono"
+                ng-model="settings.primaryColor"
+                maxlength="7"
+              />
+            </div>
+            <div class="tg-palette__swatch">
+              <span class="tg-sublabel">Secondary</span>
+              <input type="color" ng-model="settings.secondaryColor" title="Secondary" />
+              <input
+                type="text"
+                class="umb-property-editor umb-textstring tg-input--mono"
+                ng-model="settings.secondaryColor"
+                maxlength="7"
+              />
+            </div>
+            <div class="tg-palette__swatch">
+              <span class="tg-sublabel">Accent</span>
+              <input type="color" ng-model="settings.accentColor" title="Accent" />
+              <input
+                type="text"
+                class="umb-property-editor umb-textstring tg-input--mono"
+                ng-model="settings.accentColor"
+                maxlength="7"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="tg-field">
+          <label class="tg-field__hint" for="tg-custom-css" style="margin-top: 0.75rem">Generated CSS (preview)</label>
+          <textarea
+            id="tg-custom-css"
+            class="umb-property-editor umb-textarea"
+            rows="6"
+            readonly
+            ng-value="getGeneratedSiteAppearanceCss()"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="tg-setting-general__card">
+      <div class="tg-setting-general__card-header">
+        <span class="tg-setting-general__card-title">Content wrapper & unit settings</span>
+        <button
+          type="button"
+          class="tg-setting-general__card-toggle"
+          ng-click="toggleCard('contentWrapper')"
+          aria-label="{{ isCardOpen('contentWrapper') ? 'Collapse' : 'Expand' }}"
+          aria-expanded="{{ isCardOpen('contentWrapper') }}"
+        >
+          <span
+            class="icon icon-navigation-down tg-setting-general__card-toggle-icon"
+            ng-class="{ 'is-open': isCardOpen('contentWrapper') }"
+            aria-hidden="true"
+          ></span>
+        </button>
+      </div>
+      <div class="tg-setting-general__card-body" ng-show="isCardOpen('contentWrapper')">
+        <div class="tg-field">
+          <span class="tg-field__label"><span style="color: #ff0000;">⚠️Notice:</span> With this options, you have to manually update the CSS in <code>wwwroot/css/common/_common.scss</code> to apply the changes.</span>
+          <span class="tg-field__label">Use 1rem = 10px</span>
+          <span class="tg-field__hint">
+            Enables a responsive <code>html { font-size: ... }</code> scale in <code>wwwroot/css/common/_common.scss</code>.
+          </span>
+          <label style="display: flex; align-items: center; gap: 0.5rem">
+            <input type="checkbox" ng-model="settings.useRem10px" />
+            <span>Enable rem base (10px)</span>
+          </label>
+        </div>
+
+        <div class="tg-field">
+          <span class="tg-field__label">Content wrapper class</span>
+          <span class="tg-field__hint">
+            Select the class used to wrap the main content. Using <code>.box-padding</code> sets the spacing relative to the element, while <code>.container</code> sets the spacing absolutely.
+          </span>
+
+          <div class="tg-ul-dropdown" ng-class="{ 'is-open': wrapperDropdownOpen }">
+            <button
+              type="button"
+              class="tg-ul-dropdown__button umb-property-editor umb-dropdown"
+              ng-click="toggleWrapperDropdown()"
+              aria-haspopup="listbox"
+              aria-expanded="{{wrapperDropdownOpen}}"
+            >
+              {{ getWrapperChoiceLabel() }}
+            </button>
+            <ul class="tg-ul-dropdown__menu" role="listbox" ng-show="wrapperDropdownOpen">
+              <li
+                class="tg-ul-dropdown__item"
+                ng-repeat="opt in wrapperChoices"
+                ng-click="selectWrapperChoice(opt)"
+                role="option"
+                aria-selected="{{ settings.contentWrapperClass === opt.value }}"
+              >
+                <span class="tg-ul-dropdown__label">{{ opt.label }}</span>
+                <span class="tg-ul-dropdown__value tg-muted">{{ opt.value }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tg-field" ng-show="settings.contentWrapperClass === 'box-padding'">
+          <span class="tg-field__label">`.box-padding` configuration</span>
+          <span class="tg-field__hint">
+            When <code>.box-padding</code> is selected, the system will generate CSS and update <code>wwwroot/css/common/_common.scss</code> automatically.
+          </span>
+
+          <div class="tg-grid-2">
+            <div>
+              <label class="tg-field__hint" for="tg-bp-min-pad">Minimum padding-inline (px)</label>
+              <input
+                id="tg-bp-min-pad"
+                type="number"
+                class="umb-property-editor umb-textstring"
+                ng-model="settings.boxPadding.minPaddingInlinePx"
+                min="0"
+              />
+            </div>
+            <div>
+              <label class="tg-field__hint" for="tg-bp-max-pad">Maximum padding-inline (px)</label>
+              <input
+                id="tg-bp-max-pad"
+                type="number"
+                class="umb-property-editor umb-textstring"
+                ng-model="settings.boxPadding.maxPaddingInlinePx"
+                min="0"
+              />
+            </div>
+            <div>
+              <label class="tg-field__hint" for="tg-bp-min-vw">Minimum fluid viewport (px)</label>
+              <input
+                id="tg-bp-min-vw"
+                type="number"
+                class="umb-property-editor umb-textstring"
+                ng-model="settings.boxPadding.minFluidViewportPx"
+                min="0"
+              />
+            </div>
+            <div>
+              <label class="tg-field__hint" for="tg-bp-max-vw">Maximum fluid viewport (px)</label>
+              <input
+                id="tg-bp-max-vw"
+                type="number"
+                class="umb-property-editor umb-textstring"
+                ng-model="settings.boxPadding.maxFluidViewportPx"
+                min="0"
+              />
+            </div>
+          </div>
+
+          <label class="tg-field__hint" for="tg-bp-preview" style="margin-top: 0.75rem">Generated CSS (preview)</label>
+          <textarea
+            id="tg-bp-preview"
+            class="umb-property-editor umb-textarea"
+            rows="6"
+            readonly
+            ng-value="getGeneratedBoxPaddingCss()"
+          ></textarea>
+        </div>
+
+        <div class="tg-field" ng-show="settings.contentWrapperClass === 'container'">
+          <span class="tg-field__label">`.container` configuration</span>
+          <span class="tg-field__hint">
+            Edit the SCSS below. When you save, it is written to <code>wwwroot/css/common/_common.scss</code> (between the generated markers).
+          </span>
+          <label class="tg-field__hint" for="tg-container-scss" style="margin-top: 0.75rem"
+            >Generated CSS (preview)</label
+          >
+          <textarea
+            id="tg-container-scss"
+            class="umb-property-editor umb-textarea"
+            rows="6"
+            ng-model="settings.containerScss"
+          ></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="tg-setting-general__card tg-setting-general__card-custom">
+      <div class="tg-setting-general__card-header">
+        <span class="tg-setting-general__card-title">Customize CSS</span>
+        <button
+          type="button"
+          class="tg-setting-general__card-toggle"
+          ng-click="toggleCard('customCss')"
+          aria-label="{{ isCardOpen('customCss') ? 'Collapse' : 'Expand' }}"
+          aria-expanded="{{ isCardOpen('customCss') }}"
+        >
+          <span
+            class="icon icon-navigation-down tg-setting-general__card-toggle-icon"
+            ng-class="{ 'is-open': isCardOpen('customCss') }"
+            aria-hidden="true"
+          ></span>
+        </button>
+      </div>
+      <div class="tg-setting-general__card-body" ng-show="isCardOpen('customCss')">
+        <div class="tg-field">
+          <span class="tg-field__hint">
+            Lưu vào <code>Config/general-settings.json</code> và được gộp vào <code>/bundles/inline-css-bundle.css</code> trên frontend (cùng <code>main.css</code>, theme và CSS font đã generate). Xem trước trong backoffice qua thẻ style tạm.
+          </span>
+          <label class="tg-field__hint" for="tg-custom-css-editor" style="margin-top: 0.75rem">Custom CSS</label>
+          <textarea
+            id="tg-custom-css-editor"
+            class="umb-property-editor umb-textarea"
+            rows="10"
+            ng-model="settings.userCss"
+            ng-change="applyLiveUserCss()"
+            placeholder="Enter some custom CSS… (e.g. body { background: #111; })"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="tg-setting-general__card tg-setting-general__card-custom">
+      <div class="tg-setting-general__card-header">
+        <span class="tg-setting-general__card-title">Customize JS</span>
+        <button
+          type="button"
+          class="tg-setting-general__card-toggle"
+          ng-click="toggleCard('customJs')"
+          aria-label="{{ isCardOpen('customJs') ? 'Collapse' : 'Expand' }}"
+          aria-expanded="{{ isCardOpen('customJs') }}"
+        >
+          <span
+            class="icon icon-navigation-down tg-setting-general__card-toggle-icon"
+            ng-class="{ 'is-open': isCardOpen('customJs') }"
+            aria-hidden="true"
+          ></span>
+        </button>
+      </div>
+      <div class="tg-setting-general__card-body" ng-show="isCardOpen('customJs')">
+        <div class="tg-field">
+          <span class="tg-field__hint">
+            JavaScript is saved to <code>Config/general-settings.json</code> and written to
+            <code>wwwroot/scripts/custom/site-user.js</code> on Save. It is included in
+            <code>/bundles/inline-js-bundle</code> after jQuery and the default site script — you can use
+            <code>$</code> / <code>jQuery</code> directly.
+          </span>
+          <label class="tg-field__hint" for="tg-custom-js-editor" style="margin-top: 0.75rem">Custom JavaScript</label>
+          <textarea
+            id="tg-custom-js-editor"
+            class="umb-property-editor umb-textarea"
+            rows="10"
+            ng-model="settings.userJs"
+            ng-change="applyLiveUserJs()"
+            spellcheck="false"
+            placeholder="// e.g. $(function () { console.log('ready'); });"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-success" ng-click="save()">Save</button>
+  </div>
+</div>
+</div>

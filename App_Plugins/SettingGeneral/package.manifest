@@ -1,0 +1,8 @@
+{
+  "css": [
+    "~/App_Plugins/SettingGeneral/settinggeneral.css"
+  ],
+  "javascript": [
+    "~/App_Plugins/SettingGeneral/settinggeneral.overview.controller.js"
+  ]
+}

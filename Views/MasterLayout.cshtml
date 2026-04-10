@@ -1,0 +1,177 @@
+@using Microsoft.Extensions.Options
+@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage;
+@using Microsoft.Extensions.Options
+@using Umbraco.Cms.Core.Models.Blocks
+@using Umbraco.Cms.Core.Models
+@using Microsoft.Extensions.Options
+@inject GeneralSiteSettingsService SiteGeneralSettings
+@{
+    var siteLook = SiteGeneralSettings.Get();
+    var siteTagline = (siteLook.Tagline ?? "").Trim();
+    var faviconHref = "/favicon.ico" + (string.IsNullOrWhiteSpace(siteLook.FaviconVersion) ? "" : ("?v=" + siteLook.FaviconVersion));
+    var googleFontsUrl = SiteGeneralSettings.GetGoogleFontsStylesheetUrl(siteLook.FontFamily);
+
+    var language = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+    var languageCodeTool = "en-GB";
+    var domain = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var logoPath = "/media/tlofbavh/logo.svg";
+    var logoUrl = domain.TrimEnd('/') + "/" + logoPath.TrimStart('/');
+
+    if (language.Equals("en-US"))
+    {
+        language = "en";
+    }
+    if (language.Equals("zh-Hans") || language.Equals("zh-Hans-CN"))
+    {
+        language = "cn";
+    }
+    if (language.Equals("zh-Hant") || language.Equals("zh-Hant-HK"))
+    {
+        language = "hk";
+    }
+
+    var viewName = Model.Name.ToLower().Replace(" ", "-").Replace("'", "-");
+    var home = Model.Root();
+    var siteTitleSuffix = string.IsNullOrWhiteSpace(siteTagline)
+        ? home.Value<String>("companyName")
+        : siteTagline;
+
+    string dir = language.Equals("ar") ? "dir=rtl" : "dir=ltr";
+    var keywordsArray = Model.Value<string[]>("keywords") ?? Array.Empty<string>();
+    var keywords = string.Join(", ", keywordsArray);
+    if (string.IsNullOrEmpty(keywords))
+    {
+        var homeKeywords = home.Value<string[]>("keywords") ?? Array.Empty<string>();
+        keywords = string.Join(", ", homeKeywords);
+    }
+    var descriptions = "";
+    if (Model.HasValue("seoMetaDescription") && Model.Value("seoMetaDescription") != null)
+    {
+        descriptions = Model.Value<string>("seoMetaDescription");
+    }
+    if (string.IsNullOrEmpty(descriptions))
+    {
+        descriptions = home.Value<string>("seoMetaDescription");
+    }
+    var modelName = Model.Name.ToLower().Replace(" ", "-").Replace("'", "-").Replace(",", "");
+    var urlTools = home.Value<string>("urlTools");
+    var companyCode = home.Value<string>("companyCode");
+    var titleTag = !string.IsNullOrWhiteSpace(Model.Value<string>("pageEnglishTitle"))
+    ? Model.Value<string>("pageEnglishTitle")
+    : Model.Value<string>("pageTitle");
+    var canonicalUrl = Model.Url(mode: UrlMode.Absolute);
+
+    var classParent = Model.Parent?.Name?.ToLower().Replace(" ", "-").Replace("'", "-").Replace(",", "").Replace("&", "") ?? "";
+    if (string.IsNullOrWhiteSpace(classParent))
+    {
+        classParent = "home";
+    }
+
+}
+
+<!doctype html>
+<!--[if gt IE 8]><!-->
+<html class="no-js @modelName @Model.GetTemplateAlias()" lang="@language" code-tool="@languageCodeTool" @dir>
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+    <link rel="icon" type="image/x-icon" href="@faviconHref" />
+    <link rel="stylesheet" href="/bundles/inline-css-bundle.css" />
+    @if (!string.IsNullOrEmpty(googleFontsUrl))
+    {
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="stylesheet" href="@googleFontsUrl" />
+    }
+    <meta name="description" content="@descriptions">
+    <meta name="keywords" content="@keywords">
+    <link rel="canonical" href="@canonicalUrl" />
+    <meta name="msvalidate.01" content="">
+    @if (true)
+    {
+        <meta name="robots" content="noindex">
+    }
+    <meta property="og:title"
+        content="@(Model.Value<string>("pageTitle") + (" | ") + siteTitleSuffix)" />
+    <meta property="og:description" content="@descriptions" />
+    <meta property="og:locale" content="@language" />
+    <meta property="og:url" content="@canonicalUrl" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="@logoUrl" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title"
+        content="@(Model.Value<string>("pageTitle") + (" | ") + siteTitleSuffix)" />
+    <meta name="twitter:description" content="@descriptions" />
+    <meta name="twitter:image" content="@logoUrl" />
+    <meta name="twitter:site" content="" />
+
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="@domain/sitemap.xml" />
+    @RenderSection("Head", false)
+    @RenderSection("AdditionalMetaTags", false)
+
+    @if (Model != null && Model.HasProperty("alternateUrls") && Model.Value<IEnumerable<BlockListItem>>("alternateUrls")
+        != null && Model.Value<IEnumerable<BlockListItem>>("alternateUrls")?.ToList().Count > 0)
+    {
+        var alternateurlslist = Model.Value<IEnumerable<BlockListItem>>("alternateUrls")?.ToList();
+        if (alternateurlslist != null)
+        {
+            foreach (var alternateurl in alternateurlslist)
+            {
+                <link rel="alternate" href="@Convert.ToString(alternateurl.Content.Value("domainUrl"))?.ToLower()"
+                    hreflang="@Convert.ToString(alternateurl.Content.Value("code"))?.ToLower()" />
+            }
+        }
+    }
+
+    <title>@(titleTag + (" | ") + siteTitleSuffix)</title>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-123456"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-123456');
+    </script>
+    @if (!string.IsNullOrWhiteSpace(companyCode))
+    {
+        <script>
+            (function (w, d, s, e, l, i) {
+                w[s] = w[s] || []; w[s].push({ 'company': e }); w[s].push({ 'reg_key': l });
+                w[s].push({ 'svc_url': i }); var f = d.getElementsByTagName('script')[0],
+                    j = d.createElement('script'); j.src = i + '/integration/embed.js';
+                j.id = 'euroland-integration'; !d.getElementById(j.id) && f.parentNode.insertBefore(j, f);
+            })
+                (window, document, 'eurolandClientCfg', '@companyCode', null, '@urlTools');
+        </script>
+    }
+</head>
+
+<body
+    class="@Model.Name.ToLower().Replace(" ", "-").Replace("'", "-").Replace(",", "").Replace("&", "") @classParent @language @viewName">
+    @* @if (!string.IsNullOrWhiteSpace(pageRedirectURL))
+    {
+        <script>window.open(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(pageRedirectURL)), '_blank');</script>
+    } *@
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=G-123456" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    <div class="background-opacity"></div>
+    <div class="warning-search">@Umbraco.GetDictionaryValue("Enter search content!")</div>
+
+    <main class="content-wrapper">
+        @RenderBody()
+    </main>
+
+
+    <script src="/bundles/inline-js-bundle"></script>
+</body>
+
+</html>

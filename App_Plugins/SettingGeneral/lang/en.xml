@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language>
+  <area alias="sections">
+    <key alias="settingGeneral">⚙️ Setting General</key>
+  </area>
+  <area alias="apps">
+    <key alias="settingGeneral">⚙️ Setting General</key>
+  </area>
+</language>
