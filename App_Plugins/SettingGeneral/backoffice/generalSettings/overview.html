@@ -369,14 +369,40 @@
             Lưu vào <code>Config/general-settings.json</code> và được gộp vào <code>/bundles/inline-css-bundle.css</code> trên frontend (cùng <code>main.css</code>, theme và CSS font đã generate). Xem trước trong backoffice qua thẻ style tạm.
           </span>
           <label class="tg-field__hint" for="tg-custom-css-editor" style="margin-top: 0.75rem">Custom CSS</label>
-          <textarea
-            id="tg-custom-css-editor"
-            class="umb-property-editor umb-textarea"
-            rows="10"
-            ng-model="settings.userCss"
-            ng-change="applyLiveUserCss()"
-            placeholder="Enter some custom CSS… (e.g. body { background: #111; })"
-          ></textarea>
+          <div class="tg-code-editor" data-lang="CSS">
+            <div class="tg-code-editor__toolbar">
+              <div class="tg-code-editor__title">CSS</div>
+              <div class="tg-code-editor__actions">
+                <button type="button" class="btn btn-default btn-xs" ng-click="copyEditorValue('userCss')">
+                  Copy
+                </button>
+                <button type="button" class="btn btn-default btn-xs" ng-click="formatEditorValue('userCss')">
+                  Format
+                </button>
+              </div>
+            </div>
+            <div
+              class="tg-code-editor__monaco"
+              tg-monaco-editor
+              editor-key="userCss"
+              language="css"
+              ng-model="settings.userCss"
+              ng-change="applyLiveUserCss()"
+              placeholder="Enter some custom CSS… (e.g. body { background: #111; })"
+              ng-show="monacoReady && monacoReady.userCss"
+            ></div>
+            <textarea
+              id="tg-custom-css-editor"
+              class="tg-code-editor__textarea umb-property-editor umb-textarea tg-code-editor__fallback"
+              rows="10"
+              ng-model="settings.userCss"
+              ng-change="applyLiveUserCss()"
+              ng-keydown="handleEditorKeydown($event, 'userCss')"
+              spellcheck="false"
+              placeholder="Enter some custom CSS… (e.g. body { background: #111; })"
+              ng-show="!(monacoReady && monacoReady.userCss)"
+            ></textarea>
+          </div>
         </div>
       </div>
     </div>
@@ -407,15 +433,40 @@
             <code>$</code> / <code>jQuery</code> directly.
           </span>
           <label class="tg-field__hint" for="tg-custom-js-editor" style="margin-top: 0.75rem">Custom JavaScript</label>
-          <textarea
-            id="tg-custom-js-editor"
-            class="umb-property-editor umb-textarea"
-            rows="10"
-            ng-model="settings.userJs"
-            ng-change="applyLiveUserJs()"
-            spellcheck="false"
-            placeholder="// e.g. $(function () { console.log('ready'); });"
-          ></textarea>
+          <div class="tg-code-editor" data-lang="JS">
+            <div class="tg-code-editor__toolbar">
+              <div class="tg-code-editor__title">JavaScript</div>
+              <div class="tg-code-editor__actions">
+                <button type="button" class="btn btn-default btn-xs" ng-click="copyEditorValue('userJs')">
+                  Copy
+                </button>
+                <button type="button" class="btn btn-default btn-xs" ng-click="formatEditorValue('userJs')">
+                  Format
+                </button>
+              </div>
+            </div>
+            <div
+              class="tg-code-editor__monaco"
+              tg-monaco-editor
+              editor-key="userJs"
+              language="javascript"
+              ng-model="settings.userJs"
+              ng-change="applyLiveUserJs()"
+              placeholder="// e.g. $(function () { console.log('ready'); });"
+              ng-show="monacoReady && monacoReady.userJs"
+            ></div>
+            <textarea
+              id="tg-custom-js-editor"
+              class="tg-code-editor__textarea umb-property-editor umb-textarea tg-code-editor__fallback"
+              rows="10"
+              ng-model="settings.userJs"
+              ng-change="applyLiveUserJs()"
+              ng-keydown="handleEditorKeydown($event, 'userJs')"
+              spellcheck="false"
+              placeholder="// e.g. $(function () { console.log('ready'); });"
+              ng-show="!(monacoReady && monacoReady.userJs)"
+            ></textarea>
+          </div>
         </div>
       </div>
     </div>

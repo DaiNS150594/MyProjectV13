@@ -1,13 +1,13 @@
 {
   "tagline": "Basic Setup",
   "faviconVersion": null,
-  "fontFamily": "\u0022Co\u0022, sans-serif",
+  "fontFamily": "ui-monospace, \u0022Cascadia Code\u0022, \u0022Segoe UI Mono\u0022, monospace",
   "primaryColor": "#1a1a2e",
   "secondaryColor": "#f42a34",
-  "accentColor": "#98db85",
+  "accentColor": "#8596db",
   "customCss": "/* __site_font_upload_start__ */\n@font-face {\n  font-family: \u0022Co\u0022;\n  src: url(\u0022../../fonts/Co/Co-Headline-Light.otf\u0022) format(\u0022opentype\u0022);\n  font-style: normal;\n  font-weight: 300;\n  font-display: swap;\n}\n\n@font-face {\n  font-family: \u0022Co\u0022;\n  src: url(\u0022../../fonts/Co/Co-Headline.otf\u0022) format(\u0022opentype\u0022);\n  font-style: normal;\n  font-weight: 400;\n  font-display: swap;\n}\n\n@font-face {\n  font-family: \u0022Co\u0022;\n  src: url(\u0022../../fonts/Co/Co-Headline-Bold.otf\u0022) format(\u0022opentype\u0022);\n  font-style: normal;\n  font-weight: 700;\n  font-display: swap;\n}\n\n/* __site_font_upload_end__ */",
-  "userCss": "body {background-color: red;}",
-  "userJs": "$(function () { console.log(\u0027ready\u0027); });",
+  "userCss": "body {\n  background:#111;\n  color:#fff\n}\n.btn {\n  padding:10px  20px;\n  border-radius:8px\n}\n",
+  "userJs": "$(function() {\n    if(true) {\n      console.log(\u0022ready\u0022);\n    }\n    $(\u0022.a\u0022).click(function() {\n      console.log(1)\n    }\n    )\n  }\n)\n",
   "contentWrapperClass": "box-padding",
   "boxPadding": {
     "minPaddingInlinePx": 15,

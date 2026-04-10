@@ -814,6 +814,372 @@ angular.module("umbraco").controller("Test13.SettingGeneral.Overview", [
       if (jl) jl.remove();
     });
 
+    function normalizeEditorText(value) {
+      var text = value == null ? "" : String(value);
+      text = text.replace(/\r\n/g, "\n");
+      // Trim trailing whitespace per line, keep final newline as-is (user preference).
+      text = text
+        .split("\n")
+        .map(function (line) {
+          return line.replace(/[ \t]+$/g, "");
+        })
+        .join("\n");
+      return text;
+    }
+
+    function getEditorValue(modelKey) {
+      if (modelKey === "userCss") return $scope.settings.userCss;
+      if (modelKey === "userJs") return $scope.settings.userJs;
+      return "";
+    }
+
+    function setEditorValue(modelKey, newValue) {
+      if (modelKey === "userCss") {
+        $scope.settings.userCss = newValue;
+        $scope.applyLiveUserCss();
+        return;
+      }
+      if (modelKey === "userJs") {
+        $scope.settings.userJs = newValue;
+        $scope.applyLiveUserJs();
+        return;
+      }
+    }
+
+    $scope.copyEditorValue = function (modelKey) {
+      var text = normalizeEditorText(getEditorValue(modelKey));
+      function ok() {
+        notificationsService.success("Copied", "Copied to clipboard.");
+      }
+      function fail() {
+        notificationsService.warning("Copy", "Could not copy to clipboard.");
+      }
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, fail);
+        return;
+      }
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        var success = document.execCommand("copy");
+        document.body.removeChild(ta);
+        success ? ok() : fail();
+      } catch (e) {
+        fail();
+      }
+    };
+
+    $scope.formatEditorValue = function (modelKey) {
+      var ed = $scope._tgEditors && $scope._tgEditors[String(modelKey || "")];
+      if (ed && ed.getAction) {
+        var a = ed.getAction("editor.action.formatDocument");
+        if (a && a.run) {
+          var before = getEditorValue(modelKey);
+          a.run().then(
+            function () {
+              // If Monaco has no formatter, it often results in no changes.
+              // In that case, apply our fallback beautifier to make Format useful.
+              $timeout(function () {
+                var after = getEditorValue(modelKey);
+                if (String(after || "") === String(before || "")) {
+                  var formatted = formatByKey(modelKey, after);
+                  setEditorValue(modelKey, formatted);
+                  notificationsService.success("Formatted", "Formatted with fallback formatter.");
+                } else {
+                  notificationsService.success("Formatted", "Formatted document.");
+                }
+              }, 0);
+            },
+            function () {
+              var formatted0 = formatByKey(modelKey, getEditorValue(modelKey));
+              setEditorValue(modelKey, formatted0);
+              notificationsService.success("Formatted", "Formatted with fallback formatter.");
+            }
+          );
+          return;
+        }
+      }
+      var formatted = formatByKey(modelKey, getEditorValue(modelKey));
+      setEditorValue(modelKey, formatted);
+      notificationsService.success("Formatted", "Formatted with fallback formatter.");
+    };
+
+    $scope.handleEditorKeydown = function ($event, modelKey) {
+      if (!$event) return;
+      // Tab indentation
+      if ($event.key === "Tab" || $event.keyCode === 9) {
+        $event.preventDefault();
+        var el = $event.target;
+        if (!el || typeof el.selectionStart !== "number" || typeof el.selectionEnd !== "number") return;
+
+        var indent = "  ";
+        var val = getEditorValue(modelKey);
+        val = val == null ? "" : String(val);
+        var start = el.selectionStart;
+        var end = el.selectionEnd;
+
+        // If multi-line selection: indent each line in selection.
+        var before = val.slice(0, start);
+        var selected = val.slice(start, end);
+        var after = val.slice(end);
+
+        if (selected.indexOf("\n") !== -1) {
+          var selLines = selected.split("\n");
+          for (var i = 0; i < selLines.length; i++) selLines[i] = indent + selLines[i];
+          var next = before + selLines.join("\n") + after;
+          setEditorValue(modelKey, next);
+          $timeout(function () {
+            try {
+              el.selectionStart = start;
+              el.selectionEnd = end + indent.length * selLines.length;
+            } catch (ignore) {}
+          }, 0);
+          return;
+        }
+
+        var next2 = before + indent + selected + after;
+        setEditorValue(modelKey, next2);
+        $timeout(function () {
+          try {
+            var pos = start + indent.length;
+            el.selectionStart = pos;
+            el.selectionEnd = pos;
+          } catch (ignore) {}
+        }, 0);
+      }
+    };
+
+    function formatByKey(modelKey, text) {
+      var t = text == null ? "" : String(text);
+      if (String(modelKey || "") === "userJs") return prettyFormatJs(t);
+      if (String(modelKey || "") === "userCss") return prettyFormatCss(t);
+      return normalizeEditorText(t);
+    }
+
+    function prettyFormatCss(input) {
+      // Simple CSS formatter: braces + semicolons + indentation.
+      // Not a full parser, but good enough for typical user snippets.
+      var s = normalizeEditorText(input).trim();
+      if (!s) return "";
+      var out = [];
+      var indent = 0;
+      var i = 0;
+      var inStr = false;
+      var strCh = "";
+      function pushLine(line) {
+        out.push(new Array(indent + 1).join("  ") + line.trim());
+      }
+      var buf = "";
+      while (i < s.length) {
+        var ch = s[i];
+        var next = s[i + 1];
+        if (!inStr && ch === "/" && next === "*") {
+          // block comment
+          var end = s.indexOf("*/", i + 2);
+          var c = end === -1 ? s.slice(i) : s.slice(i, end + 2);
+          if (buf.trim()) {
+            pushLine(buf);
+            buf = "";
+          }
+          pushLine(c);
+          i = end === -1 ? s.length : end + 2;
+          continue;
+        }
+        if (!inStr && (ch === '"' || ch === "'")) {
+          inStr = true;
+          strCh = ch;
+          buf += ch;
+          i++;
+          continue;
+        }
+        if (inStr) {
+          buf += ch;
+          if (ch === "\\" && i + 1 < s.length) {
+            buf += s[i + 1];
+            i += 2;
+            continue;
+          }
+          if (ch === strCh) {
+            inStr = false;
+            strCh = "";
+          }
+          i++;
+          continue;
+        }
+        if (ch === "{") {
+          var head = buf.trim();
+          buf = "";
+          pushLine(head + " {");
+          indent++;
+          i++;
+          continue;
+        }
+        if (ch === "}") {
+          if (buf.trim()) {
+            pushLine(buf);
+            buf = "";
+          }
+          indent = Math.max(0, indent - 1);
+          pushLine("}");
+          i++;
+          continue;
+        }
+        if (ch === ";") {
+          buf += ";";
+          pushLine(buf);
+          buf = "";
+          i++;
+          continue;
+        }
+        if (ch === "\n") {
+          if (buf.trim()) {
+            pushLine(buf);
+            buf = "";
+          }
+          i++;
+          continue;
+        }
+        buf += ch;
+        i++;
+      }
+      if (buf.trim()) pushLine(buf);
+      return out.join("\n") + "\n";
+    }
+
+    function prettyFormatJs(input) {
+      // Simple JS formatter: braces + semicolons + indentation.
+      // Handles strings and basic comments; not a full JS parser.
+      var s = normalizeEditorText(input).trim();
+      if (!s) return "";
+      var out = [];
+      var indent = 0;
+      var i = 0;
+      var inStr = false;
+      var strCh = "";
+      var inLineComment = false;
+      var inBlockComment = false;
+      var buf = "";
+      function pushLine(line) {
+        var t = line.replace(/\s+/g, " ").trim();
+        if (!t) return;
+        out.push(new Array(indent + 1).join("  ") + t);
+      }
+      while (i < s.length) {
+        var ch = s[i];
+        var next = s[i + 1];
+
+        if (inLineComment) {
+          buf += ch;
+          if (ch === "\n") {
+            pushLine(buf);
+            buf = "";
+            inLineComment = false;
+          }
+          i++;
+          continue;
+        }
+        if (inBlockComment) {
+          buf += ch;
+          if (ch === "*" && next === "/") {
+            buf += "/";
+            i += 2;
+            pushLine(buf);
+            buf = "";
+            inBlockComment = false;
+            continue;
+          }
+          i++;
+          continue;
+        }
+
+        if (!inStr && ch === "/" && next === "/") {
+          if (buf.trim()) {
+            pushLine(buf);
+            buf = "";
+          }
+          inLineComment = true;
+          buf = "//";
+          i += 2;
+          continue;
+        }
+        if (!inStr && ch === "/" && next === "*") {
+          if (buf.trim()) {
+            pushLine(buf);
+            buf = "";
+          }
+          inBlockComment = true;
+          buf = "/*";
+          i += 2;
+          continue;
+        }
+
+        if (!inStr && (ch === '"' || ch === "'" || ch === "`")) {
+          inStr = true;
+          strCh = ch;
+          buf += ch;
+          i++;
+          continue;
+        }
+        if (inStr) {
+          buf += ch;
+          if (ch === "\\" && i + 1 < s.length) {
+            buf += s[i + 1];
+            i += 2;
+            continue;
+          }
+          if (ch === strCh) {
+            inStr = false;
+            strCh = "";
+          }
+          i++;
+          continue;
+        }
+
+        if (ch === "{") {
+          var head = buf.trim();
+          buf = "";
+          pushLine(head + " {");
+          indent++;
+          i++;
+          continue;
+        }
+        if (ch === "}") {
+          if (buf.trim()) {
+            pushLine(buf);
+            buf = "";
+          }
+          indent = Math.max(0, indent - 1);
+          pushLine("}");
+          i++;
+          continue;
+        }
+        if (ch === ";") {
+          buf += ";";
+          pushLine(buf);
+          buf = "";
+          i++;
+          continue;
+        }
+        if (ch === "\n") {
+          if (buf.trim()) {
+            pushLine(buf);
+            buf = "";
+          }
+          i++;
+          continue;
+        }
+        buf += ch;
+        i++;
+      }
+      if (buf.trim()) pushLine(buf);
+      return out.join("\n") + "\n";
+    }
+
     /** Cho host absolute inset:0 — cha trực tiếp (wrapper ng-include) cần cao 100% khớp .umb-editor */
     var scrollHostLayoutCleanup = null;
     function wireScrollHostLayout() {
@@ -844,5 +1210,186 @@ angular.module("umbraco").controller("Test13.SettingGeneral.Overview", [
     $timeout(wireScrollHostLayout, 200);
 
     load();
+  },
+]);
+
+angular.module("umbraco").directive("tgMonacoEditor", [
+  "$timeout",
+  function ($timeout) {
+    function getUmbracoPath() {
+      try {
+        var sv = Umbraco.Sys.ServerVariables;
+        var base =
+          (sv.umbracoSettings && sv.umbracoSettings.umbracoPath) || "/umbraco";
+        if (typeof base !== "string") base = "/umbraco";
+        return base.replace(/\/+$/, "");
+      } catch (e) {
+        return "/umbraco";
+      }
+    }
+
+    function loadMonaco(cb) {
+      if (window.monaco && window.monaco.editor) return cb(null, window.monaco);
+      if (!window.require || !window.require.config) {
+        return cb(new Error("RequireJS not available"));
+      }
+      var base = getUmbracoPath();
+      window.require.config({
+        paths: { vs: base + "/lib/monaco-editor/min/vs" },
+      });
+      window.require(
+        ["vs/editor/editor.main"],
+        function () {
+          if (window.monaco && window.monaco.editor) return cb(null, window.monaco);
+          cb(new Error("Monaco loaded but not available"));
+        },
+        function (err) {
+          cb(err || new Error("Failed to load Monaco"));
+        }
+      );
+    }
+
+    return {
+      restrict: "A",
+      require: "ngModel",
+      scope: {
+        editorKey: "@",
+        language: "@",
+        placeholder: "@",
+      },
+      link: function (scope, element, attrs, ngModel) {
+        var editor = null;
+        var model = null;
+        var suppress = false;
+
+        function setReadyFlag(v) {
+          try {
+            var s = scope.$parent;
+            if (!s) return;
+            if (!s.monacoReady) s.monacoReady = {};
+            s.monacoReady[String(scope.editorKey || "")] = !!v;
+          } catch (ignore) {}
+        }
+
+        function registerEditorOnParent(ed) {
+          try {
+            var s = scope.$parent;
+            if (!s) return;
+            if (!s._tgEditors) s._tgEditors = {};
+            s._tgEditors[String(scope.editorKey || "")] = ed;
+          } catch (ignore) {}
+        }
+
+        function dispose() {
+          try {
+            if (editor) editor.dispose();
+          } catch (ignore) {}
+          editor = null;
+          model = null;
+        }
+
+        setReadyFlag(false);
+
+        loadMonaco(function (err, monaco) {
+          if (err) {
+            setReadyFlag(false);
+            return;
+          }
+
+          $timeout(function () {
+            var initial = ngModel.$viewValue == null ? "" : String(ngModel.$viewValue);
+            var lang = String(scope.language || "plaintext");
+
+            model = monaco.editor.createModel(initial, lang);
+
+            editor = monaco.editor.create(element[0], {
+              model: model,
+              automaticLayout: true,
+              minimap: { enabled: false },
+              scrollBeyondLastLine: false,
+              fontSize: 13,
+              lineHeight: 20,
+              lineNumbers: "on",
+              lineNumbersMinChars: 3,
+              roundedSelection: true,
+              wordWrap: "on",
+              tabSize: 2,
+              insertSpaces: true,
+              renderWhitespace: "selection",
+              renderLineHighlight: "line",
+              glyphMargin: false,
+              folding: true,
+              contextmenu: true,
+              padding: { top: 10, bottom: 10 },
+              theme: "vs-dark",
+            });
+
+            registerEditorOnParent(editor);
+            setReadyFlag(true);
+
+            // Ensure content starts at top (avoid weird vertical offset).
+            try {
+              editor.setScrollTop(0);
+              editor.revealLine(1);
+            } catch (ignore) {}
+
+            // Placeholder (simple): show when empty by using an overlay widget.
+            if (scope.placeholder) {
+              var domNode = document.createElement("div");
+              domNode.className = "tg-monaco-placeholder";
+              domNode.textContent = scope.placeholder;
+              var widget = {
+                getId: function () {
+                  return "tg-monaco-placeholder-" + (scope.editorKey || "");
+                },
+                getDomNode: function () {
+                  return domNode;
+                },
+                getPosition: function () {
+                  return { position: { lineNumber: 1, column: 1 }, preference: [0] };
+                },
+              };
+              editor.addOverlayWidget(widget);
+              function updatePlaceholder() {
+                try {
+                  var empty = !model.getValue();
+                  domNode.style.display = empty ? "block" : "none";
+                } catch (ignore) {}
+              }
+              updatePlaceholder();
+              model.onDidChangeContent(updatePlaceholder);
+            }
+
+            model.onDidChangeContent(function () {
+              if (suppress) return;
+              suppress = true;
+              $timeout(function () {
+                try {
+                  ngModel.$setViewValue(model.getValue());
+                } finally {
+                  suppress = false;
+                }
+              }, 0);
+            });
+
+            ngModel.$render = function () {
+              if (!model) return;
+              var v = ngModel.$viewValue == null ? "" : String(ngModel.$viewValue);
+              if (model.getValue() === v) return;
+              suppress = true;
+              try {
+                model.setValue(v);
+              } finally {
+                suppress = false;
+              }
+            };
+
+            scope.$on("$destroy", function () {
+              dispose();
+            });
+          }, 0);
+        });
+      },
+    };
   },
 ]);
