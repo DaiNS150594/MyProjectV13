@@ -1,0 +1,42 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Umbraco.Cms.Core.Models.PublishedContent;
+@using Umbraco.Cms.Core.Models;
+@using System.Linq;
+@{
+  Layout = "childPageLayout.cshtml";
+  var pageTitle = Model.Value<string>("pageTitle");
+  var siteRoot = Umbraco.ContentAtRoot().FirstOrDefault();
+  var topLevelPages = siteRoot?.Children().Where(x => x.IsVisible()) ?? Enumerable.Empty<IPublishedContent>();
+}
+
+<div class="sitemap-container">
+  <div class="container ">
+    @{ RenderSitemapLevel(topLevelPages, 6, true); }
+  </div>
+</div>
+
+@functions {
+  private void RenderSitemapLevel(IEnumerable<IPublishedContent> items, int depth, bool isRoot)
+  {
+    if (depth <= 0 || items == null || !items.Any())
+    {
+      return;
+    }
+    <ul class="@(isRoot ? "bread-crumb clearfix" : null)">
+      @foreach (var item in items)
+      {
+        var children = item.Children().Where(x => x.IsVisible()).ToList();
+        <li class="level-@item.Level">
+          <a href="@item.Url()" title="">
+            <span>@(item.Value<string>("pageTitle") ?? item.Name)</span>
+          </a>
+          @if (children.Any() && depth > 1)
+          {
+            RenderSitemapLevel(children, depth - 1, false);
+          }
+        </li>
+      }
+    </ul>
+  }
+}

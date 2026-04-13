@@ -1,0 +1,11 @@
+﻿@using Umbraco.Cms.Core.Models.PublishedContent
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<IPublishedContent>
+
+@{
+	Layout = "masterLayout.cshtml";
+	var parentUrl = Model.Parent?.Url();
+	if (!string.IsNullOrWhiteSpace(parentUrl) && Context.Request.Path != parentUrl)
+	{
+		Context.Response.Redirect(parentUrl, true);
+	}
+}

@@ -1,0 +1,60 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using Umbraco.Cms.Web.Common.PublishedModels
+@using Microsoft.AspNetCore.Html
+@using Umbraco.Cms.Core.Models.PublishedContent
+@using System.Linq
+@{
+	Layout = "childPageLayout.cshtml";
+	var home = Model.Root();
+	var commonEmbedPage = home.DescendantsOfType("commonEmbedPage")?.FirstOrDefault() ?? null;
+	var toolSource = Model.Value("toolSource");
+	var additionalText = Model.Value("additionalText");
+	var pageTitle = Model.Value("pageTitle").ToString();
+	var dataToolName = Model.Value<string>("dataToolName");
+	var dataToolUrlBase = Model.Value<string>("dataToolUrlBase");
+	var dataToolVersion = Model.Value<string>("dataToolVersion");
+	var dataToolCompany = Model.Value<string>("dataToolCompany");
+	var dataLazy = Model.Value<string>("dataLazy");
+	var dataToolEnforcedCompanyCode = Model.Value<string>("dataToolEnforcedCompanyCode");
+	var dataToolAbsoluteUrl = Model.Value<string>("dataToolAbsoluteUrl");
+	var dataToolLanguage = Model.Value<string>("dataToolLanguage");
+	var language = System.Threading.Thread.CurrentThread.CurrentCulture.Name;
+}
+
+
+<div class="content-embed-layout">
+	<div class="container">
+		@if (dataToolName != "")
+		{
+			@if (dataToolName.Equals("Bundle"))
+			{
+				<euroland-tool data-tool-name="@dataToolName" data-tool-version="@dataToolVersion"
+					data-tool-absolute-url="@dataToolAbsoluteUrl" data-tool-language="@dataToolLanguage">
+				</euroland-tool>
+			}
+			else if (dataToolName.Equals("factsheet"))
+			{
+				<euroland-tool data-tool-name="@dataToolName" data-tool-url-base="@dataToolUrlBase"
+					data-tool-language="@dataToolLanguage">
+				</euroland-tool>
+			}
+			else
+			{
+				<euroland-tool data-tool-name="@dataToolName" data-tool-version="@dataToolVersion"
+					data-tool-url-base="@dataToolUrlBase" data-tool-company="@dataToolCompany"
+					data-tool-language="@dataToolLanguage">
+				</euroland-tool>
+			}
+
+		}
+
+		@if (Model.HasValue("additionalText"))
+		{
+			<div class="additional-text">
+				<p>
+					@additionalText
+				</p>
+			</div>
+		}
+	</div>
+</div>

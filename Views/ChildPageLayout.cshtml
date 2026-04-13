@@ -1,0 +1,20 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage;
+@using Umbraco.Cms.Core.Models
+
+@{
+    Layout = "masterLayout.cshtml";
+    var home = Model.Root();
+    var parentTitle = Model.Parent.Value<string>("pageTitle");
+    var title = Model.HasValue("pageTitle") ? Model.Value<string>("pageTitle") : "";
+    var templateID = Model.TemplateId.HasValue ? Model.TemplateId.Value : 0;
+    var documentType = Model.ContentType.Alias;
+}
+
+<div
+    class="childpage-content template-@templateID template-@Model.ContentType.Alias  @Model.Name.ToLower().Replace(" ", "-").Replace("'", "-")">
+
+    <div class="inner-content">
+        @RenderBody()
+    </div>
+</div>

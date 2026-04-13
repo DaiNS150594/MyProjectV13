@@ -1,0 +1,118 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage;
+@using Umbraco.Cms.Core.Models.PublishedContent;
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+@using Umbraco.Cms.Core.Models;
+@{
+	Layout = "childPageLayout.cshtml";
+	var home = Model.Root();
+	var contents = Model.Children.Where(x => x.IsVisible());
+	var tab = HttpContextAccessor.HttpContext?.Request.Query["tab"].ToString() ?? "";
+}
+
+<!-- Tab Header -->
+<div>
+	<div class="container">
+		<div id="tab-header">
+			@foreach (var item in contents)
+			{
+				var tabName = item.Name.ToLower().Replace(" ", "-").Replace("'", "-");
+				var isActive = tabName == tab || (string.IsNullOrEmpty(tab) && contents.First() == item);
+				var documentType = item.ContentType.Alias;
+				bool isRerirect = false;
+				var redirectLink = "";
+				var classActive = "";
+				var index = contents.IndexOf(item);
+				if (documentType.Equals("redirectPage"))
+				{
+					isRerirect = true;
+					redirectLink = item.Value<Link>("redirectLink").Url;
+				}
+				if (index == 0)
+				{
+					classActive = "active";
+				}
+				<button id="@tabName" class="tab-button @(isRerirect ? "redirect-page" : "") @(classActive)"
+						data-tab="@tabName" data-redirect="@redirectLink">
+					@item.Value("pageTitle")
+				</button>
+			}
+		</div>
+	</div>
+
+	<!-- Tab Content -->
+	@if (contents != null && contents.Any())
+	{
+		int iIndex = 0;
+		<div class="tab-content">
+
+			@foreach (var item in contents)
+			{
+				var tabName = item.Name.ToLower().Replace(" ", "-").Replace("'", "-");
+				var documentType = item.ContentType.Alias;
+				var toolSource = "";
+				var dataToolName = "";
+				var dataToolUrlBase = "";
+				var dataToolVersion = "";
+				var dataToolCompany = "";
+				var dataLazy = "";
+				var dataToolEnforcedCompanyCode = "";
+				var dataToolLanguage = "";
+				var dataToolAbsoluteUrl = "";
+				if (documentType.Equals("commonEmbedPage"))
+				{
+					toolSource = item.HasProperty("toolSource") && item.HasValue("toolSource") ? item.Value<string>("toolSource") :
+					"";
+					dataToolName = item.HasProperty("dataToolName") && item.HasValue("dataToolName") ?
+					item.Value<string>("dataToolName") : "";
+					dataToolUrlBase = item.HasProperty("dataToolUrlBase") && item.HasValue("dataToolUrlBase") ?
+				item.Value<string>("dataToolUrlBase") : "";
+					dataToolCompany = item.HasProperty("dataToolCompany") && item.HasValue("dataToolCompany") ?
+					item.Value<string>("dataToolCompany") : "";
+					dataToolVersion = item.HasProperty("dataToolVersion") && item.HasValue("dataToolVersion") ?
+					item.Value<string>("dataToolVersion") : "";
+					dataLazy = item.HasProperty("dataLazy") && item.HasValue("dataLazy") ? item.Value<string>("dataLazy") : "";
+					dataToolEnforcedCompanyCode = item.HasProperty("dataToolEnforcedCompanyCode") &&
+					item.HasValue("dataToolEnforcedCompanyCode") ? item.Value<string>("dataToolEnforcedCompanyCode") : "";
+					dataToolLanguage = item.HasProperty("dataToolLanguage") && item.HasValue("dataToolLanguage") ?
+					item.Value<string>("dataToolLanguage") : "";
+					dataToolAbsoluteUrl = item.HasProperty("dataToolAbsoluteUrl") && item.HasValue("dataToolAbsoluteUrl") ?
+					item.Value<string>("dataToolAbsoluteUrl") : "";
+				}
+
+				<div id="@tabName-content" class="tab-pane hidden transition-all duration-500 ease-in">
+					@if (documentType.Equals("commonEmbedPage"))
+					{
+						<div class="tool-section-embed">
+							<div class="container">
+								@if (dataToolName != "")
+								{
+									@if (dataToolName.Equals("Bundle"))
+									{
+										<euroland-tool data-tool-name="@dataToolName" data-tool-version="@dataToolVersion"
+													   data-tool-absolute-url="@dataToolAbsoluteUrl" data-tool-language="@dataToolLanguage">
+										</euroland-tool>
+									}
+									else if (dataToolName.Equals("factsheet"))
+									{
+										<euroland-tool data-tool-name="@dataToolName" data-tool-url-base="@dataToolUrlBase"
+													   data-tool-language="@dataToolLanguage">
+										</euroland-tool>
+									}
+									else
+									{
+										<euroland-tool data-tool-name="@dataToolName" data-tool-version="@dataToolVersion"
+													   data-tool-url-base="@dataToolUrlBase" data-tool-company="@dataToolCompany"
+													   data-tool-language="@dataToolLanguage">
+										</euroland-tool>
+									}
+								}
+							</div>
+						</div>
+					}
+				</div>
+				iIndex++;
+			}
+		</div>
+	}
+</div>

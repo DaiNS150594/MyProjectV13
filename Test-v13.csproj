@@ -28,7 +28,6 @@
     <RazorCompileOnPublish>false</RazorCompileOnPublish>
   </PropertyGroup>
 
-  <!-- Umbraco / static files thường phục vụ /App_Plugins/... từ wwwroot trước — mirror để trình duyệt không bám bản cũ ở ContentRoot -->
   <Target Name="MirrorAppPluginsSettingGeneralToWwwroot" BeforeTargets="Build">
     <ItemGroup>
       <_SgPluginFiles Include="$(MSBuildProjectDirectory)\App_Plugins\SettingGeneral\**\*.*" />

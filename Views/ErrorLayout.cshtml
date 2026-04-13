@@ -1,0 +1,24 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage;
+@using Umbraco.Cms.Core.Models
+
+
+@{
+    Layout = "childPageLayout.cshtml";
+    var home = Model.Root();
+    var homePageLogoUrl = home.HasProperty("homePageLogoUrl") && home.HasValue("homePageLogoUrl") ?
+    home.Value<Link>("homePageLogoUrl")?.Url : home.Url();
+}
+
+<div class="error-page container">
+    <div class="internal-server-error-page">
+        <div class="error-section">
+            <h1 class="error-title page-title">404</h1>
+            <h3>Page not found</h3>
+            <div class="error-content">
+                <p>Unfortunately, something has gone wrong.</p>
+                <a class="back-home" href="@homePageLogoUrl">Back to home</a>
+            </div>
+        </div>
+    </div>
+</div>

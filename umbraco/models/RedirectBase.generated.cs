@@ -18,9 +18,19 @@ using Umbraco.Extensions;
 
 namespace Umbraco.Cms.Web.Common.PublishedModels
 {
+	// Mixin Content Type with alias "redirectBase"
+	/// <summary>Redirect Base</summary>
+	public partial interface IRedirectBase : IPublishedContent
+	{
+		/// <summary>Redirect Link</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.13.1+667c2f5")]
+		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
+		global::Umbraco.Cms.Core.Models.Link RedirectLink { get; }
+	}
+
 	/// <summary>Redirect Base</summary>
 	[PublishedModel("redirectBase")]
-	public partial class RedirectBase : PublishedContentModel
+	public partial class RedirectBase : PublishedContentModel, IRedirectBase
 	{
 		// helpers
 #pragma warning disable 0109 // new is redundant
@@ -55,6 +65,11 @@ namespace Umbraco.Cms.Web.Common.PublishedModels
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.13.1+667c2f5")]
 		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
 		[ImplementPropertyType("redirectLink")]
-		public virtual global::Umbraco.Cms.Core.Models.Link RedirectLink => this.Value<global::Umbraco.Cms.Core.Models.Link>(_publishedValueFallback, "redirectLink");
+		public virtual global::Umbraco.Cms.Core.Models.Link RedirectLink => GetRedirectLink(this, _publishedValueFallback);
+
+		/// <summary>Static getter for Redirect Link</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "13.13.1+667c2f5")]
+		[return: global::System.Diagnostics.CodeAnalysis.MaybeNull]
+		public static global::Umbraco.Cms.Core.Models.Link GetRedirectLink(IRedirectBase that, IPublishedValueFallback publishedValueFallback) => that.Value<global::Umbraco.Cms.Core.Models.Link>(publishedValueFallback, "redirectLink");
 	}
 }

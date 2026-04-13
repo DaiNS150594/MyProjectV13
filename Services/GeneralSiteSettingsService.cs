@@ -128,6 +128,10 @@ public class GeneralSiteSettingsService
             Add(specs, "Lato:wght@400;700");
         if (fontFamilyCss.Contains("Merriweather", StringComparison.OrdinalIgnoreCase))
             Add(specs, "Merriweather:wght@400;700");
+        if (fontFamilyCss.Contains("SourceHanSansCN", StringComparison.OrdinalIgnoreCase))
+            Add(specs, "Source+Han+Sans+CN:wght@400;500;600;700");
+        if (fontFamilyCss.Contains("Microsoft YaHei", StringComparison.OrdinalIgnoreCase))
+            Add(specs, "Microsoft+YaHei:wght@400;500;600;700");
 
         if (specs.Count == 0) return null;
 

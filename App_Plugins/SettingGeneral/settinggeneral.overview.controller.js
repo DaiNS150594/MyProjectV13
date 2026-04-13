@@ -358,6 +358,8 @@ angular.module("umbraco").controller("Test13.SettingGeneral.Overview", [
       { label: "Lato", value: "Lato, system-ui, sans-serif" },
       { label: "Georgia (serif)", value: "Georgia, 'Times New Roman', serif" },
       { label: "Merriweather (serif)", value: "Merriweather, Georgia, serif" },
+      { label: "SourceHanSansCN-Normal", value: "SourceHanSansCN-Normal, system-ui, sans-serif" },
+      { label: "Microsoft YaHei", value: "Microsoft YaHei, system-ui, sans-serif" },
       {
         label: "Monospace (code)",
         value: 'ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace',

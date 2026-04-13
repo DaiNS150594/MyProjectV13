@@ -1,0 +1,19 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage;
+@using Umbraco.Cms.Core.Models
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+
+@{
+    Layout = null;
+    var home = Model.Root();
+    var redirectLink = Model.Value<Link>("redirectLink");
+    var nullUrl = "javascript:void(0)";
+}
+
+@if (redirectLink != null && redirectLink.Url.Length > 0)
+{
+    Context.Response.Redirect(redirectLink.Url);
+}
+else if (redirectLink == null)
+{
+    Context.Response.Redirect(nullUrl);
+}
