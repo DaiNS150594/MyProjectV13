@@ -5,7 +5,7 @@ using Microsoft.Net.Http.Headers;
 using Umbraco.Cms.Core.Configuration.Models;
 using IHostingEnvironment = Umbraco.Cms.Core.Hosting.IHostingEnvironment;
 
-namespace umb_moiselle_ir.Services
+namespace umb_projectv13.Services
 {
     public class ConfigureStaticFileOptions : IConfigureOptions<StaticFileOptions>
     {
