@@ -27,9 +27,9 @@ public class GeneralSiteSettingsService
     }
 
     /// <summary>
-    /// Khi F5 / IIS Express, ContentRoot thường là bin\Debug\net10.0 — file trong repo Config\ không đổi.
-    /// Ưu tiên thư mục có .csproj + thư mục Config (đi lên từ BaseDirectory).
-    /// Publish: không có .csproj → dùng ContentRootPath/Config như cũ.
+    /// When running with F5 / IIS Express, the ContentRoot is typically bin\Debug\net10.0, so the Config\ file in the repo is not changed.
+    /// Prefer the directory with both a .csproj file and a Config folder (by traversing upwards from BaseDirectory).
+    /// When published (no .csproj present), fallback to using ContentRootPath/Config as before.
     /// </summary>
     private static string ResolveConfigFilePath(IWebHostEnvironment env)
     {
